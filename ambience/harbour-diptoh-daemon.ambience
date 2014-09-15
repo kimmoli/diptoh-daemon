@@ -1,0 +1,11 @@
+{
+    "displayName"               : "diptoh",
+    "wallpaper"                 : "diptoh.jpg",
+    "highlightColor"            : "#FFFF00",
+    "secondaryHighlightColor"   : "#FFFF00BB",
+    "primaryColor"              : "#FFFFFF",
+    "secondaryColor"            : "#FFFFFF99",
+    "ringerVolume"              : 100,
+    "favorite"			: true
+}
+

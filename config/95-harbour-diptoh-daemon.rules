@@ -1,0 +1,5 @@
+# diptoh udev rules. Start daemon on insert, stop on remove
+# TOH_VID = 0x1989, TOH_PID = 0x0002
+#
+KERNEL=="toh-core.0", ATTR{vendor}=="6537", ATTR{product}=="2", ACTION=="add", RUN+="/bin/systemctl start harbour-diptoh-daemon"
+KERNEL=="toh-core.0", ACTION=="remove", RUN+="/bin/systemctl stop harbour-diptoh-daemon"
