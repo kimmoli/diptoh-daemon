@@ -14,30 +14,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "mcp23009driver.h"
 #include <QStringList>
 #include <QSocketNotifier>
+#include <QThread>
+#include "worker.h"
 
 class Dips : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString version READ readVersion NOTIFY versionChanged())
 
 public:
     explicit Dips(QObject *parent = 0);
     ~Dips();
 
-    QString readVersion();
-
-    Q_INVOKABLE QStringList readDips();
-
-
-signals:
-    void versionChanged();
-    void dipsToggled();
 
 private slots:
-    void gpioChangedState(int fd);
+    void gpioChangedState();
 
 private:
-
     void vddStateSet(bool state);
     void gpioExport();
     void gpioRelease();
@@ -49,6 +41,10 @@ private:
 
     mcp23009Driver* mcp;
 
+    QThread *thread;
+    Worker *worker;
+
+    char prevDips;
 };
 
 

@@ -5,6 +5,8 @@ mcp23009Driver::mcp23009Driver(unsigned char address)
 {
     mcp23009Address = address;
     init();
+
+    printf("mcp23009 initialized\n");
 }
 
 mcp23009Driver::~mcp23009Driver()

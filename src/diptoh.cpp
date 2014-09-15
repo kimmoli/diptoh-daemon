@@ -8,49 +8,71 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
-#ifdef QT_QML_DEBUG
-#include <QtQuick>
-#endif
-
-#include <sailfishapp.h>
-#include <QtQml>
 #include <QScopedPointer>
-#include <QQuickView>
-#include <QQmlEngine>
-#include <QGuiApplication>
-#include <QQmlContext>
 #include <QCoreApplication>
-#include <QProcessEnvironment>
 #include "dips.h"
 
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+void daemonize();
+void signalHandler(int sig);
+
+Dips* dips;
 
 int main(int argc, char *argv[])
 {
 
-    bool rootUser = false;
+    QCoreApplication app(argc, argv);
+    daemonize();
 
-    QStringList environment = QProcessEnvironment::systemEnvironment().toStringList();
-    for (int n=0; n<environment.length(); n++)
-        if (environment.at(n) == "USER=root")
-        {
-            rootUser = true;
-            break;
-        }
+    setlinebuf(stdout);
+    setlinebuf(stderr);
 
-    if (!rootUser)
-    {
-        qCritical() << "Error: You need to be root to use this utility!";
-        return 0;
-    }
+    printf("diptoh starting, yay. My version is %s\n", APPVERSION);
 
-    qmlRegisterType<Dips>("diptoh.Dips", 1, 0, "Dips");
+    dips = new Dips();
 
-    QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
-    QScopedPointer<QQuickView> view(SailfishApp::createView());
-    view->setSource(SailfishApp::pathTo("qml/diptoh.qml"));
-    view->show();
-
-    return app->exec();
+    return app.exec();
 }
+
+
+void daemonize()
+{
+    /* Change the file mode mask */
+    umask(0);
+
+    /* Change the current working directory */
+    if ((chdir("/tmp")) < 0)
+        exit(EXIT_FAILURE);
+
+    /* register signals to monitor / ignore */
+    signal(SIGCHLD,SIG_IGN); /* ignore child */
+    signal(SIGTSTP,SIG_IGN); /* ignore tty signals */
+    signal(SIGTTOU,SIG_IGN);
+    signal(SIGTTIN,SIG_IGN);
+    signal(SIGHUP,signalHandler); /* catch hangup signal */
+    signal(SIGTERM,signalHandler); /* catch kill signal */
+}
+
+
+void signalHandler(int sig) /* signal handler function */
+{
+    switch(sig)
+    {
+        case SIGHUP:
+            /* rehash the server */
+            printf("Received signal SIGHUP\n");
+            break;
+        case SIGTERM:
+            /* finalize the server */
+            printf("Received signal SIGTERM\n");
+            delete(dips);
+            printf("diptoh exiting, bye\n");
+            exit(0);
+            break;
+    }
+}
+
 

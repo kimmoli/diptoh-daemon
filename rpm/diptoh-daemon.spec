@@ -45,7 +45,7 @@ rm -rf %{buildroot}
 %attr(755,root,root) %{_bindir}/%{name}
 %config /etc/systemd/system/%{name}.service
 %config /etc/udev/rules.d/95-%{name}.rules
-%config /etc/dbus-1/system.d/%{name}.conf
+%attr(755,root,root) /home/nemo/diptoh/dip*.sh
 %{_datadir}/ambience/%{name}
 %{_datadir}/ambience/%{name}/%{name}.ambience
 %{_datadir}/ambience/%{name}/images/*
