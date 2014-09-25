@@ -182,51 +182,49 @@ void Dips::gpioInterruptEdge()
 void Dips::gpioChangedState()
 {
     QProcess process[7];
-
-    printf("Dips toggled: ");
-
-    char data = mcp->readInputState();
-
     int i;
-    for (i=5 ; i>=0; i--)
-    {
-        printf((data & 1<<i) ? "1" : "0");
-    }
-    printf(" button %s\n", (data & 1<<7) ? "down" : "up");
+    char data;
 
-    if (data == prevDips)
-    {
-        printf("Nothing actually changed\n");
-    }
-    else
-    {
-        for (i=5 ; i>=0; i--)
+    data = mcp->readInputState();
+
+    do {
+
+        if (data != prevDips)
         {
-            if ((data & 1<<i) != (prevDips & 1<<i))
+            for (i=5 ; i>=0; i--)
             {
-                printf("dip %d changed to %s\n", i+1, (data & 1<<i) ? "on" : "off");
-                process[i].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/dip%1%2.sh").arg(i+1).arg((data & 1<<i) ? "on" : "off"));
+                if ((data & 1<<i) != (prevDips & 1<<i))
+                {
+                    printf("dip %d changed to %s\n", i+1, (data & 1<<i) ? "on" : "off");
+                    process[i].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/dip%1%2.sh").arg(i+1).arg((data & 1<<i) ? "on" : "off"));
+                }
             }
+
+            /* Check if button was pressed or released */
+            if ((data & 1<<7) != (prevDips & 1<<7))
+            {
+
+                if ((data & 1<<7) == (1<<7))
+                {
+                    printf("Button pressed\n");
+                    process[6].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/buttondown.sh"));
+                }
+                else
+                {
+                    printf("Button released\n");
+                    process[6].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/buttonup.sh"));
+                }
+            }
+            prevDips = data;
         }
 
-        /* Check if button was pressed or released */
-        if ((data & 1<<7) != (prevDips & 1<<7))
-        {
+        QThread::msleep(50); /* "debounce filter" wait 50ms before reading again */
 
-            if ((data & 1<<7) == (1<<7))
-            {
-                printf("Button pressed\n");
-                process[6].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/buttondown.sh"));
-            }
-            else
-            {
-                printf("Button released\n");
-                process[6].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/buttonup.sh"));
-            }
-        }
-    }
+        data = mcp->readInputState();
 
-    prevDips = data;
+    } while (data != prevDips);
+
+    data = mcp->readInterruptCapture(); /* Clear interrupt */
 }
 
 /* iphb wakeup stuff */

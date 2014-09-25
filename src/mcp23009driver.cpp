@@ -31,8 +31,8 @@ void mcp23009Driver::init()
     /* Interrupt on change control register - compare to previous value */
     writeToRegister(INTCON, 0x00);
 
-    /* Configuration register - opendrain interrupt, reading GPIO register clears interrupt */
-    writeToRegister(IOCON, 0x04);
+    /* Configuration register - opendrain interrupt, reading INTCAP register clears interrupt */
+    writeToRegister(IOCON, 0x05);
 
     /* Pullups, all except pushbutton */
     writeToRegister(GPPU, 0x7F);
@@ -51,6 +51,13 @@ char mcp23009Driver::readInputState()
     return data.at(0);
 }
 
+char mcp23009Driver::readInterruptCapture()
+{
+    QByteArray data;
+    data = writeThenRead(mcp23009Address, INTCAP, 1);
+
+    return data.at(0);
+}
 
 void mcp23009Driver::writeToRegister(char regAddr, char data)
 {

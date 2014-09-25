@@ -32,6 +32,7 @@ public:
 
     void init();
     char readInputState();
+    char readInterruptCapture();
     void writeToRegister(char regAddr, char data);
     int isAlive();
 
