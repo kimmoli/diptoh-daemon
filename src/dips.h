@@ -17,6 +17,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <QThread>
 #include "worker.h"
 
+extern "C"
+{
+    #include "iphbd/libiphb.h"
+}
+
 class Dips : public QObject
 {
     Q_OBJECT
@@ -28,6 +33,10 @@ public:
 
 private slots:
     void gpioChangedState();
+
+    void heartbeatReceived(int sock);
+    void iphbStop();
+    void iphbStart();
 
 private:
     void vddStateSet(bool state);
@@ -43,6 +52,11 @@ private:
 
     QThread *thread;
     Worker *worker;
+
+    iphb_t iphbdHandler;
+    int iphb_fd;
+    QSocketNotifier *iphbNotifier;
+    bool iphbRunning;
 
     char prevDips;
 };

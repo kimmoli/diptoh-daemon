@@ -33,6 +33,7 @@ public:
     void init();
     char readInputState();
     void writeToRegister(char regAddr, char data);
+    int isAlive();
 
 private:
     unsigned char mcp23009Address;

@@ -17,6 +17,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <QSocketNotifier>
 #include <QProcess>
 
+extern "C"
+{
+    #include "iphbd/libiphb.h"
+}
 
 #define GPIO_INT "67"
 #define GPIO_INT_EDGE "falling"
@@ -54,6 +58,31 @@ Dips::Dips(QObject *parent) :
 
         printf("Worker started\n");
     }
+
+    iphbRunning = false;
+    iphbdHandler = iphb_open(0);
+
+    if (!iphbdHandler)
+        printf("Error opening iphb\n");
+
+    iphb_fd = iphb_get_fd(iphbdHandler);
+
+    iphbNotifier = new QSocketNotifier(iphb_fd, QSocketNotifier::Read);
+
+    if (!QObject::connect(iphbNotifier, SIGNAL(activated(int)), this, SLOT(heartbeatReceived(int))))
+    {
+        delete iphbNotifier, iphbNotifier = 0;
+        printf("failed to connect iphbNotifier\n");
+    }
+    else
+    {
+        iphbNotifier->setEnabled(false);
+    }
+
+    if (iphbNotifier)
+        printf("iphb initialized succesfully\n");
+
+    heartbeatReceived(0);
 }
 
 
@@ -200,3 +229,62 @@ void Dips::gpioChangedState()
     prevDips = data;
 }
 
+/* iphb wakeup stuff */
+
+void Dips::heartbeatReceived(int sock)
+{
+    Q_UNUSED(sock);
+
+    iphbStop();
+
+    if (!mcp->isAlive())
+    {
+        printf("Seems that GPIO chip has been disconnect. Reinitializing...\n");
+        mcp->init();
+    }
+
+    iphbStart();
+}
+
+void Dips::iphbStart()
+{
+    if (iphbRunning)
+        return;
+
+    if (!(iphbdHandler && iphbNotifier))
+    {
+        printf("iphbStart iphbHandler not ok\n");
+        return;
+    }
+
+    time_t unixTime = iphb_wait(iphbdHandler, 25, 35 , 0);
+
+    if (unixTime == (time_t)-1)
+    {
+        printf("iphbStart timer failed\n");
+        return;
+    }
+
+    iphbNotifier->setEnabled(true);
+    iphbRunning = true;
+
+}
+
+void Dips::iphbStop()
+{
+    if (!iphbRunning)
+        return;
+
+    if (!(iphbdHandler && iphbNotifier))
+    {
+        printf("iphbStop iphbHandler not ok\n");
+        return;
+    }
+
+    iphbNotifier->setEnabled(false);
+
+    (void)iphb_discard_wakeups(iphbdHandler);
+
+    iphbRunning = false;
+
+}

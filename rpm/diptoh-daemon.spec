@@ -11,7 +11,7 @@ Name: harbour-diptoh-daemon
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 
 Summary: Diptoh OtherHalf daemon
-Version: 0.2
+Version: 0.3
 Release: 1
 Group: Qt/Qt
 License: LICENSE
@@ -20,6 +20,7 @@ Source0: %{name}-%{version}.tar.bz2
 
 BuildRequires: pkgconfig(Qt5Core)
 BuildRequires: pkgconfig(Qt5DBus)
+BuildRequires: pkgconfig(libiphb)
 
 Requires:   ambienced
 

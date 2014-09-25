@@ -19,7 +19,7 @@ void mcp23009Driver::init()
     /* Set all pins as inputs */
     writeToRegister(IODIR, 0xFF);
 
-    /* Inveert DIP switch inputs */
+    /* Invert DIP switch inputs */
     writeToRegister(IPOL, 0x3F);
 
     /* Interrupt on change of dip-switches and push-button */
@@ -65,6 +65,16 @@ void mcp23009Driver::writeToRegister(char regAddr, char data)
 
 }
 
+/*
+ * Check that GPINTEN has value programmed at init()
+ */
+int mcp23009Driver::isAlive()
+{
+    QByteArray data;
+    data = writeThenRead(mcp23009Address, GPINTEN, 1);
+
+    return (data.at(0) == 0xBF);
+}
 
 
 
