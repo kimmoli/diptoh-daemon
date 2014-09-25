@@ -26,4 +26,5 @@ you can ```tail -f /home/nemo/diplog``` to see are the scripts executed when you
 
 Turning dipswitch 1 on runs ```dip1on.sh``` and turning dipswitch 3 off runs ```dip3off.sh``` and so on.
 
+Pressing the hidden button runs ```buttondown.sh``` and releasing it runs ```buttonup.sh```.
 
