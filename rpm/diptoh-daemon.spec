@@ -11,7 +11,7 @@ Name: harbour-diptoh-daemon
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 
 Summary: Diptoh OtherHalf daemon
-Version: 0.1
+Version: 0.2
 Release: 1
 Group: Qt/Qt
 License: LICENSE
@@ -45,7 +45,8 @@ rm -rf %{buildroot}
 %attr(755,root,root) %{_bindir}/%{name}
 %config /etc/systemd/system/%{name}.service
 %config /etc/udev/rules.d/95-%{name}.rules
-%attr(755,root,root) /home/nemo/diptoh/dip*.sh
+%config(noreplace) %attr(755,root,root) /home/nemo/diptoh/dip*.sh
+%config(noreplace) %attr(755,root,root) /home/nemo/diptoh/button*.sh
 %{_datadir}/ambience/%{name}
 %{_datadir}/ambience/%{name}/%{name}.ambience
 %{_datadir}/ambience/%{name}/images/*

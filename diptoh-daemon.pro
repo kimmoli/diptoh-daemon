@@ -20,7 +20,7 @@ images.path = $${ambience.path}/images
 images.files = ambience/images/*
 
 scripts.path = /home/nemo/diptoh
-scripts.files = config/dip*.sh
+scripts.files = config/dip*.sh config/button*.sh
 
 DEFINES += "APPVERSION=\\\"$${SPECVERSION}\\\""
 
@@ -59,5 +59,7 @@ OTHER_FILES += \
     config/dip2on.sh \
     config/dip2off.sh \
     config/dip1on.sh \
-    config/dip1off.sh
+    config/dip1off.sh \
+    config/buttondown.sh \
+    config/buttonup.sh
 

@@ -22,15 +22,14 @@ void mcp23009Driver::init()
     /* Inveert DIP switch inputs */
     writeToRegister(IPOL, 0x3F);
 
-    /* Interrupt on change of dip-switches */
-    writeToRegister(GPINTEN, 0x3F);
+    /* Interrupt on change of dip-switches and push-button */
+    writeToRegister(GPINTEN, 0xBF);
 
     /* Default comparison value */
     writeToRegister(DEFVAL, 0x00);
 
     /* Interrupt on change control register - compare to previous value */
-    /* Except pushbutton, compare to 0 */
-    writeToRegister(INTCON, 0x80);
+    writeToRegister(INTCON, 0x00);
 
     /* Configuration register - opendrain interrupt, reading GPIO register clears interrupt */
     writeToRegister(IOCON, 0x04);

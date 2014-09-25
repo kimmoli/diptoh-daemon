@@ -152,6 +152,8 @@ void Dips::gpioInterruptEdge()
 
 void Dips::gpioChangedState()
 {
+    QProcess process[7];
+
     printf("Dips toggled: ");
 
     char data = mcp->readInputState();
@@ -161,7 +163,7 @@ void Dips::gpioChangedState()
     {
         printf((data & 1<<i) ? "1" : "0");
     }
-    printf("\n");
+    printf(" button %s\n", (data & 1<<7) ? "down" : "up");
 
     if (data == prevDips)
     {
@@ -174,8 +176,23 @@ void Dips::gpioChangedState()
             if ((data & 1<<i) != (prevDips & 1<<i))
             {
                 printf("dip %d changed to %s\n", i+1, (data & 1<<i) ? "on" : "off");
-                QProcess process;
-                process.startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/dip%1%2.sh").arg(i+1).arg((data & 1<<i) ? "on" : "off"));
+                process[i].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/dip%1%2.sh").arg(i+1).arg((data & 1<<i) ? "on" : "off"));
+            }
+        }
+
+        /* Check if button was pressed or released */
+        if ((data & 1<<7) != (prevDips & 1<<7))
+        {
+
+            if ((data & 1<<7) == (1<<7))
+            {
+                printf("Button pressed\n");
+                process[6].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/buttondown.sh"));
+            }
+            else
+            {
+                printf("Button released\n");
+                process[6].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/buttonup.sh"));
             }
         }
     }
