@@ -28,9 +28,19 @@ extern "C"
 Dips::Dips(QObject *parent) :
     QObject(parent)
 {
+    QThread::msleep(100);
+
     vddStateSet(true);
 
     mcp = new mcp23009Driver(MCP23009_ADDRESS);
+
+    QThread::msleep(100);
+
+    /* Clear interrupts if any */
+    mcp->readInterruptCapture();
+
+    /* Take this state as default state */
+    prevDips = mcp->readInputState();
 
     gpioExport();
     gpioDirection(false);
@@ -44,8 +54,6 @@ Dips::Dips(QObject *parent) :
     connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
     connect(thread, SIGNAL(started()), worker, SLOT(doWork()));
     connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
-
-    prevDips = mcp->readInputState();
 
     gpioFd = open("/sys/class/gpio/gpio" GPIO_INT "/value", O_RDONLY | O_NONBLOCK);
 
@@ -197,6 +205,7 @@ void Dips::gpioChangedState()
                 {
                     printf("dip %d changed to %s\n", i+1, (data & 1<<i) ? "on" : "off");
                     process[i].startDetached("/bin/sh", QStringList()<< QString("/home/nemo/diptoh/dip%1%2.sh").arg(i+1).arg((data & 1<<i) ? "on" : "off"));
+                    QThread::msleep(50);
                 }
             }
 

@@ -11,7 +11,7 @@ Name: harbour-diptoh-daemon
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 
 Summary: Diptoh OtherHalf daemon
-Version: 0.4
+Version: 0.5
 Release: 1
 Group: Qt/Qt
 License: LICENSE
