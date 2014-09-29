@@ -1,7 +1,7 @@
 diptoh daemon
 =======
 
-Daemon for diptoh otherhalf (by dirkvl)
+Daemon for diptoh otherhalf (by dirkvl http://funkyotherhalf.com/ )
 
 EEPROM Programming instructions http://talk.maemo.org/showpost.php?p=1439339&postcount=73
 
